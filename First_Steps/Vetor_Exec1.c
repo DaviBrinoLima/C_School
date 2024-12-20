@@ -1,6 +1,3 @@
-// Faça um programa que defina um vetor v= {4,1,5,8,6}, imprimindo o menor e o maior valor presente
-
-
 #include <stdio.h>
 
 

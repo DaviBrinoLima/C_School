@@ -1,4 +1,4 @@
-#include<stdio.h>
+#include <stdio.h>
 
 
 int main() {
@@ -6,7 +6,7 @@ int main() {
 
 
     printf("Insira a string: ");
-    scanf("%9s", &s);
+    scanf("%9s", s);
 
 
     printf("%s \n", s);
