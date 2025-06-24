@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "Exec_Decomposicao.C": "cpp"
     }
 }
