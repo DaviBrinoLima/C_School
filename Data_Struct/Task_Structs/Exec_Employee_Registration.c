@@ -11,7 +11,7 @@ int main(void) {
     char teste_sexo;
 
     while (1){
-        printf("***Iniciando Cadastrado de novo funcionário (Para encerrar o programa insira '0' no código do funcionário)***\n");
+        printf("\n***Iniciando Cadastrado de novo funcionário (Para encerrar o programa insira '0' no código do funcionário)***\n");
         
         printf("Insira o código do funcionário: ");
         scanf(" %d", &employee.codigo);
@@ -36,7 +36,7 @@ int main(void) {
                 scanf(" %c", &teste_sexo);
             }
 
-            if ((teste_sexo == 'M') || (teste_sexo == 'F')) {
+            else {
                 employee.sexo = teste_sexo;
                 break;
             }
