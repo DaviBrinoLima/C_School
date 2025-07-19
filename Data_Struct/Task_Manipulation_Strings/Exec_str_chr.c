@@ -6,18 +6,15 @@ void flush_in(){
     while( (ch = fgetc(stdin)) != EOF && ch != '\n' ){}
 }
 
-int str_chr(char *string, char caracter, int index) {
-    int len = strlen(string);
+int str_chr(char *string, char character, int index) {
+    int len = strlen(string), result_index = 0;
 
     for (int i = index; i<len; i++){
-        if (caracter == string[i]) {
-            return i;
+        if (character == string[i]) {
+            result_index = i;
+            return result_index;
         }
-
-        else if ((caracter != string[i]) && (i== len-1)){
-            return -1;
-    }
-}
+    }   
 }
 
 int correct_errors(char *string, char index_desire){
@@ -79,7 +76,7 @@ void main(){
     int indice_desejado = correct_errors(frase, deseja_indice);
     int indice_resultado = str_chr(frase, caractere, indice_desejado);
 
-    if (indice_resultado == -1){
+    if (indice_resultado == 0){
         printf("\nNão foi encontrado nenhuma aparição do caractere '%c' a partir do índice %d na string analisada\n", caractere, indice_desejado);
     }
 
