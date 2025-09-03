@@ -22,7 +22,7 @@ void print_vector(int **pointer_to_vector, int len_vector) {
 
         (*pointer_to_vector)++;
     }
-
+   
     printf("\n");
 }
 
@@ -46,9 +46,9 @@ int main() {
 
     ponteiro_vetor = &vetor;
     print_vector(ponteiro_vetor, tamanho_vetor);
-    
-    vetor--;free(vetor); vetor = NULL;
-    free(ponteiro_vetor); ponteiro_vetor = NULL;
+
+    vetor = NULL; ponteiro_vetor = NULL;
+    free(vetor); free(ponteiro_vetor);
     
     return 0;
 }
