@@ -13,7 +13,7 @@ void buffer_clear(){
 }
 
 int main() {
-    FILE *archive = fopen("Banco_de_Dados_Alunos.dat", "a+b"); //Abre em modo de escrita append binária 
+    FILE *archive = fopen("bin_file_manipulation.dat", "a+b"); //Abre em modo de escrita append binária 
 
     if (archive == NULL) {
         printf("ERRO AO ABRIR O ARQUIVO, ENCERRANDO O PROGRAMA\n");
