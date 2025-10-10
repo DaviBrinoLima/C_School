@@ -1,9 +1,9 @@
 #include "max6675.h"
 
-const int SCK_Port = 6, CS_Port = 5, MISO_Port = 4; 
+const int SCK_Port = 6, CS_Port = 5, MISO_Port = 4; //define as portas de comunicacáo que serao utilizadas do termopar
 MAX6675 termopar(SCK_Port, CS_Port, MISO_Port);
 
-const int zero_crossing = 11, upper_resistance = 10, lower_resistance = 9, operation_mode = 8;
+const int zero_crossing = 11, upper_resistance = 10, lower_resistance = 9, operation_mode = 8; //
 
 unsigned long time;
 double temperature;
