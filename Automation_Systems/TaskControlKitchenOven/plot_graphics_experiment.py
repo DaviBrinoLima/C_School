@@ -1,5 +1,3 @@
-from asyncore import file_dispatcher
-from cgi import print_directory
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,10 +6,10 @@ def extract_data_csv_file(file):
         file_line = collected_data.readline()
         
         temp = ""
-        for i in range(24,29):
+        for i in range(21,25):
             temp+= file_line[i]
         
-        time_and_temp = [{"Time": int(file_line[7]), "Temperatura": float(temp)}]
+        time_and_temp = [{"Time": int(file_line[6]), "Temperatura": float(temp)}]
 
         while file_line:
             file_line = collected_data.readline()
@@ -35,20 +33,23 @@ def extract_data_csv_file(file):
 def plot_graph(x,y,time_final,temp_max,set_point): 
     plt.plot(x,y, color = "k")
     plt.grid()
-
-    plt.xlabel("Tempo (Min)", fontsize = 10)
+    
+    
+    plt.xlabel("Tempo (Min)", fontsize = "medium", fontweight = "heavy", fontstyle = "italic")
     plt.xlim(0,time_final)
     plt.xticks(np.arange(0,time_final,1))
 
-    plt.ylabel("Temperatura (°C)", fontsize = 10)
+    plt.ylabel("Temperatura (°C)", fontsize = "medium", fontweight = "heavy", fontstyle = "italic", )
     plt.ylim(0,temp_max)
     plt.yticks(np.arange(0,temp_max,5))
     plt.axhline(set_point, color = "r", linestyle = "dashed",label= "SetPoint")
 
-    plt.title("Controle de Temperatura On/Off", fontsize = 14)
+    plt.title("Controle de Temperatura On/Off", fontsize = "large", fontweight = "heavy", fontstyle = "italic")
+    plt.legend()
 
+    plt.savefig("teste.png")
     plt.show()
-
+    
 
 def main():
     experiment_data = extract_data_csv_file("TaskControlKitchenOven/experiment_setpoint_95.csv")
