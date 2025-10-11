@@ -5,7 +5,7 @@ MAX6675 termopar(SCK_Port, CS_Port, MISO_Port);
 
 const int zero_crossing = 11, upper_resistance = 10, lower_resistance = 9, operation_mode = 8; //
 
-unsigned long time;
+unsigned long time, zero_time;
 double temperature;
 
 void begin_serial_comunication() {
@@ -35,21 +35,30 @@ void control_on_off(float set_pt) {
   else {
     digitalWrite (lower_resistance,HIGH);
     digitalWrite (upper_resistance,HIGH);
-  }
+  } 
 }
 
-void fuzzy_control(float set_pt) {
-  if (temperature <= (set_pt/2)) {
-  digitalWrite (lower_resistance,HIGH);
-  digitalWrite (upper_resistance,HIGH);  
+void angle_trigger_control(float set_pt) {
+  if (temperature >= set_pt) {
+     digitalWrite (lower_resistance,LOW);
+    digitalWrite (upper_resistance,LOW);
   }
 
-  if (temperature <= (set_pt*0.75)) {   
-    digitalWrite (lower_resistance,HIGH);
-    digitalWrite (upper_resistance,HIGH);
+  else{
+    if ((digitalRead(zero_crossing)) == HIGH) {
+      zero_time = millis();
+  
+      digitalWrite (lower_resistance,LOW);
+      digitalWrite (upper_resistance,LOW);
+    }
+  
+    if ((zero_time+5) == time) {
+      
+      digitalWrite (lower_resistance,HIGH);
+      digitalWrite (upper_resistance,HIGH); 
+    }
   }
 }
-
 
 void setup() {
   begin_serial_comunication();
@@ -68,28 +77,15 @@ void setup() {
 void loop() {
   time = millis();
   float set_point = 110;
-  
-  unsigned long new_time;
-
-//  if ((digitalRead(zero_crossing)) == HIGH) {
-//    new_time = millis();
 //
-//    digitalWrite (lower_resistance,LOW);
-//    digitalWrite (upper_resistance,LOW);
-//  }
-//
-//  if ((new_time+6) == time) {
-//    digitalWrite (lower_resistance,HIGH);
-//    digitalWrite (upper_resistance,HIGH); 
-//  }
+  angle_trigger_control(set_point);
+//  control_on_off(set_point);
     
   if ((time%1000) == 0) {
     print_time();
-  
+
     temperature = termopar.readCelsius();
     print_temp();
-
-    control_on_off(set_point);
   } 
 
 }
