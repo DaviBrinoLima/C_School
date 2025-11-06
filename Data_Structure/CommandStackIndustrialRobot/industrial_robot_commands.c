@@ -1,21 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
-typedef struct 
-{
-    int id;
-    float processing_time;
-    int priority;
+char command[50];
 
-}Part;
 
 typedef struct 
 {
     Part *production_orders;
     int begin, end, len_queue, len_production_orders;
 
-}Queue;
+}Stack;
 
 void queuebegin(Queue *qq) {
     qq->begin= 0;
