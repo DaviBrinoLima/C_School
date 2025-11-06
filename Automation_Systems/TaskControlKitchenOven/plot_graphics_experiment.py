@@ -50,7 +50,7 @@ def plot_graph(x,y,final_time,max_temp,set_point):
     plt.legend()
 
 
-    plt.savefig(f"TaskControlKitchenOven/ExperimentData/graph_potency_{set_point}.png")
+    plt.savefig(f"TaskControlKitchenOven/ExperimentData/graph_On_Off_{set_point}.png")
     plt.show()
 
 def main():
