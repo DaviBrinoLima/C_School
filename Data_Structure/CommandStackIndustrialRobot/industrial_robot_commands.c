@@ -1,99 +1,113 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char command[50];
-
-
 typedef struct 
 {
-    Part *production_orders;
-    int begin, end, len_queue, len_production_orders;
+    char **commands;
+    int top;
+    int stack_len;
 
 }Stack;
 
-void queuebegin(Queue *qq) {
-    qq->begin= 0;
-    qq->end=-1;
-    qq->len_queue = 0;
-    qq->len_production_orders = 0;
-
-    qq->production_orders = malloc((1) * sizeof(Part));
+void stackbegin(Stack *st) {
+    st->top = -1;
+    st->commands = malloc((1) * sizeof(char *));
 }
 
-void enqueue(Queue *qq,Part pt){
-    if ((qq->end +1) == (qq->len_queue)){
-        qq->len_production_orders++;
-        qq->production_orders= realloc(qq->production_orders, (qq->len_production_orders) * sizeof(Part));
+void stack_up(Stack *st,char *command){
+    if ((st->top +1) == (st->stack_len)){
+        st->stack_len++;
+        st->commands= realloc(st->commands, (st->stack_len) * sizeof(char *));
     }
 
-    qq->end = ((qq->end + 1) % qq->len_production_orders);
-    qq->production_orders[qq->end] = pt;
-    qq->len_queue++;
+    st->top++;
+    st->commands[st->top]= command;
 }
 
-Part dequeue(Queue *qq){
-    if (qq->len_queue == 0) {
-        Part null_part;
-        null_part.id = -1, null_part.priority= -1, null_part.processing_time = 0;
+char *undo_stack(Stack *action, Stack *undo){
+    if (action->top == -1) {
+        printf("\nIMPOSSÍVEL DESFAZER COMANDO, A PILHA DE AÇÕES ESTÁ VAZIA!\n");
+        return NULL;
+    }
+    
+    char *command_executed = action->commands[action->top];
 
-        return null_part;
+    action->top--;
+
+    if ((undo->top + 1) == (undo->stack_len)){
+        undo->stack_len++;
+        undo->commands= realloc(undo->commands, (undo->stack_len) * sizeof(char *));
     }
 
-    Part pt = qq->production_orders[qq->begin];
-    qq->begin = ((qq->begin + 1) % qq->len_production_orders);
-    qq->len_queue--;
+    undo->top++;
+    undo->commands[undo->top] = command_executed;
 
-    return pt;
+    return command_executed;
 }
 
-void print_queues(Queue *normal_queue, Queue *priority_queue) {
-    printf("EXIBINDO A FILA DE PEÇAS AGUARDANDO PROCESSAMENTO POR ORDEM DE CHEGADA E PRIORIDADE\n");
+char *redo_stack(Stack *undo, Stack *action){
+    if (undo->top == -1) {
+        printf("\nIMPOSSÍVEL REFAZER COMANDO, A PILHA DE DESFAZER ESTÁ VAZIA!\n");
+        return NULL;
+    }
+    
+    char *command_executed = undo->commands[undo->top];
 
-    if ((priority_queue->len_queue) == 0 && (normal_queue->len_queue==0)){
-        printf("\nFILA VAZIA! NENHUMA PEÇA AGUARDNANDO PROCESSAMENTO\n");
+    undo->top--;
+
+
+    action->top++;
+    action->commands[action->top] = command_executed;
+
+    return command_executed;
+}
+
+void print_stacks(Stack *action, Stack *undo) {
+    printf("EXIBINDO PILHA DE AÇÕES:\n");
+
+    if ((action->top) == -1){
+        printf("\nPILHA DE AÇÕES VAZIA! NENHUM COMANDO EXECUTADO\n");
     }
 
     else{
-        for (int i = 0; i<priority_queue->len_queue; i++) {
-            int index = ((priority_queue->begin + i) % priority_queue->len_production_orders);
-
-            printf("\nID da Peça: %d", priority_queue->production_orders[index].id);
-            printf("\nTempo necessário para processamento da Peça: %fs", priority_queue->production_orders[index].processing_time);
-            printf("\nPrioridade da peça = URGENTE");
-            printf("\nPosição da peça na fila: %d\n", i+1);
+        for (int i = 0; i<=action->top; i++) {
+            printf("\nComando: %s\n", action->commands[action->top - i]);
+            printf("\nPosição do comando na pilha: %d\n", action->top - i);
         }
+    }
 
-        for (int i = 0; i<normal_queue->len_queue; i++) {
-            int index = ((normal_queue->begin + i) % normal_queue->len_production_orders);
+    printf("\nEXIBINDO PILHA DE DESFAZER:\n");
 
-            printf("\nID da Peça: %d", normal_queue->production_orders[index].id);
-            printf("\nTempo para processamento da Peça: %fs", normal_queue->production_orders[index].processing_time);
-            printf("\nPrioridade da peça = NORMAL");
-            printf("\nPosição da peça na fila: %d\n", (priority_queue->len_queue+1+i));
+    if ((undo->top) == -1){
+        printf("\nPILHA DE DESFAZER VAZIA! NENHUM COMANDO PARA SER DESFEITO\n");
+    }
+
+    else{
+        for (int i = 0; i<=undo->top; i++) {
+            printf("\nComando: %s\n", undo->commands[undo->top - i]);
+            printf("\nPosição do comando na pilha: %d\n", undo->top - i);
         }
     }
 
 }
 
 int main() {
-    Queue normal_queue, priority_queue;
-    Part master_part;
+    char robot_command[50];
 
-    int num_processed_parts = 0;
-    float total_processing_time = 0;
+    Stack stack_action, stack_undo;
 
 
 
-    queuebegin(&normal_queue);
-    queuebegin(&priority_queue);
+    stackbegin(&stack_action);
+    stackbegin(&stack_undo);
 
-    printf("INICIANDO CLI DO CONTROLE DE PRODUÇÃO DE PEÇAS\n");
+    printf("INICIANDO CLI DA PILHA DE COMANDOS DE UM ROBÔ INDUSTRIAL\n");
     printf("--------------------------------------------------------------------------------------------------------------\n\n");
 
     while (1) {
         int next_command;
 
-        printf("1 - INSERIR NOVA PEÇA \n2 - PROCESSAR PRÓXIMA PEÇA DA FILA \n3 - EXIBIR FILA DE PEÇAS \n4 - EXIBIR ESTATÍSTICAS \n0 - ENCERRAR O PROGRAMA\n\n");
+        printf("1 - EXECUTAR NOVO COMANDO \n2 - DESFAZER COMANDO\n3 - REFAZER COMANDO \n4 - LISTAR PILHAS \n0 - ENCERRAR O PROGRAMA\n\n");
         scanf("%d", &next_command);
 
         printf("--------------------------------------------------------------------------------------------------------------\n\n");
@@ -103,77 +117,42 @@ int main() {
         }
 
         else if (next_command == 1){
-            printf("INICIANDO INSERÇÃO DE NOVA PEÇA\n\n");
+            printf("INICIANDO EXECUÇÃO DE NOVO COMANDO\n\n");
 
-            printf("Digite o ID da nova peça: ");
-            scanf(" %d", &master_part.id);
-            
-            printf("Digite o tempo necessário para o processamento da nova peça (TEMPO EM SEGUNDOS): ");
-            scanf(" %f", &master_part.processing_time);
+            printf("Digite o novo comando a ser executado: \n");
+            scanf(" %s", robot_command);
 
-            printf("Digite a prioridade da nova peça (URGENTE = 1 | NORMAL = 0): ");
-            scanf(" %d", &master_part.priority);
-
-            if (master_part.priority == 1) {
-                enqueue(&priority_queue, master_part);
-            }
-
-            else{
-                enqueue(&normal_queue, master_part);
-            }
-        }
+            stack_up(&stack_action, robot_command);
+        }   
 
         else if (next_command == 2){
-            printf("PROCESSANDO PRÓXIMA PEÇA DA FILA, AGUARDE!\n\n");
+            printf("DESFAZENDO COMANDO!\n\n");
+            char *undo_commando = undo_stack(&stack_action, &stack_undo);
 
-            if (priority_queue.len_queue > 0) {
-                master_part = dequeue(&priority_queue);
-                sleep(master_part.processing_time);
+
+            if (undo_commando != NULL){
+            printf("O comando desfeito foi: %s\n\n", undo_commando);
             }
-
-            else {
-                master_part = dequeue(&normal_queue);
-                sleep(master_part.processing_time);
-            }
-
-            if (master_part.id != -1) { 
-                printf("PROCESSANDO CONCLÚIDO, A PEÇA PROCESSADA CONTÉM OS SEGUINTES DADOS: \n\n");
-
-                printf("\nID da Peça: %d", master_part.id);
-                printf("\nDuração do processamento da Peça: %fs", master_part.processing_time);
-                
-                if (master_part.priority == 1){
-                    printf("\nPrioridade da peça processada: URGENTE");
-                }
-
-                else {
-                    printf("\nPrioridade da peça processada: NORMAL\n");
-                }
-
-                num_processed_parts++;
-                total_processing_time = total_processing_time + master_part.processing_time;
-            }
-
-            else {
-                printf("IMPOSSÍVEL CONCLUIR PROCESSAMENTO, A FILA ESTÁ VAZIA!\n\n");
-            }
-
         }   
         
         else if (next_command == 3) {
-            print_queues(&normal_queue, &priority_queue);
+            printf("REFAZENDO COMANDO!\n\n");
+            char *redo_commando = redo_stack(&stack_undo, &stack_action);
+
+
+            if (redo_commando != NULL){
+            printf("O comando desfeito foi: %s\n\n", redo_commando);
+            }
         }
 
         else if (next_command == 4) {
-            printf("EXIBINDO ESTATÍSTICAS DO CONTROLE DE PRODUÇÃO\n\n");
-            
-            printf("Total de peças processadas = %d\n", num_processed_parts);
-            printf("Tempo total gasto processando peças = %f\n", total_processing_time);
+            printf("LISTANDO PILHAS\n\n");
+            print_stacks(&stack_action,&stack_undo);
         }
 
         printf("\n--------------------------------------------------------------------------------------------------------------\n\n");   
     }
 
-    free(priority_queue.production_orders), free(normal_queue.production_orders);
+    free(stack_action.commands), free(stack_undo.commands);
 }
 
