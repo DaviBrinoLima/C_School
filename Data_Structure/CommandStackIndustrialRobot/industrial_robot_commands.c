@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct 
 {
@@ -8,6 +9,11 @@ typedef struct
     int stack_len;
 
 }Stack;
+
+void buffer_clear(){
+    int ch;
+    while( (ch = fgetc(stdin)) != EOF && ch != '\n' ){}
+}
 
 void stackbegin(Stack *st) {
     st->top = -1;
@@ -21,7 +27,7 @@ void stack_up(Stack *st,char *command){
     }
 
     st->top++;
-    st->commands[st->top]= command;
+    st->commands[st->top]= strdup(command);
 }
 
 char *undo_stack(Stack *action, Stack *undo){
@@ -71,21 +77,21 @@ void print_stacks(Stack *action, Stack *undo) {
 
     else{
         for (int i = 0; i<=action->top; i++) {
-            printf("\nComando: %s\n", action->commands[action->top - i]);
-            printf("\nPosição do comando na pilha: %d\n", action->top - i);
+            printf("\nComando: %s", action->commands[action->top - i]);
+            printf("Posição do comando na pilha: %d\n", action->top - i);
         }
     }
 
     printf("\nEXIBINDO PILHA DE DESFAZER:\n");
 
     if ((undo->top) == -1){
-        printf("\nPILHA DE DESFAZER VAZIA! NENHUM COMANDO PARA SER DESFEITO\n");
+        printf("\nPILHA DE DESFAZER VAZIA! NENHUM COMANDO PARA SER REFEITO\n");
     }
 
     else{
         for (int i = 0; i<=undo->top; i++) {
-            printf("\nComando: %s\n", undo->commands[undo->top - i]);
-            printf("\nPosição do comando na pilha: %d\n", undo->top - i);
+            printf("\nComando: %s", undo->commands[undo->top - i]);
+            printf("nPosição do comando na pilha: %d\n", undo->top - i);
         }
     }
 
@@ -95,8 +101,6 @@ int main() {
     char robot_command[50];
 
     Stack stack_action, stack_undo;
-
-
 
     stackbegin(&stack_action);
     stackbegin(&stack_undo);
@@ -117,10 +121,12 @@ int main() {
         }
 
         else if (next_command == 1){
+            buffer_clear();
+            
             printf("INICIANDO EXECUÇÃO DE NOVO COMANDO\n\n");
 
-            printf("Digite o novo comando a ser executado: \n");
-            scanf(" %s", robot_command);
+            printf("Digite o novo comando a ser executado: ");
+            fgets(robot_command, 49, stdin);
 
             stack_up(&stack_action, robot_command);
         }   
@@ -131,7 +137,7 @@ int main() {
 
 
             if (undo_commando != NULL){
-            printf("O comando desfeito foi: %s\n\n", undo_commando);
+            printf("O comando desfeito foi: %s", undo_commando);
             }
         }   
         
@@ -141,7 +147,7 @@ int main() {
 
 
             if (redo_commando != NULL){
-            printf("O comando desfeito foi: %s\n\n", redo_commando);
+            printf("O comando desfeito foi: %s", redo_commando);
             }
         }
 

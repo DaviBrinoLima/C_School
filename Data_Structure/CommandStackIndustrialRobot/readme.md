@@ -1,4 +1,4 @@
-# Atividade Remota - Pilha - Pilha de Comandos em um Robô Industrial
+# Atividade Remota - Pilha - Pilha de Comandos de um Robô Industrial
 
 Alunos:
 Davi Brino Lima - 172280
